@@ -1006,18 +1006,11 @@ function isSafe(report) {
             report.toString() === [...report].sort((a, b) => b - a).toString()) &&
             report.every((level, index) => index === 0 ||
                 (level !== report[index - 1] && Math.abs(level - report[index - 1]) <= 3));
-    // console.log(`Report '${report}' is ${safe ? 'safe' : 'unsafe'}`);
-    // return safe;
 }
 
 function isPDSafe(report) {
-    return isSafe(report) || report.some((_level, index) => {
-        console.log(report.toString());
-        console.log(index, [...report.slice(0, index), ...report.slice(index + 1)].toString());        
-        const safe = isSafe([...report.slice(0, index), ...report.slice(index + 1)]);
-        console.log('Safe', safe);
-        return safe;
-    });
+    return isSafe(report) ||
+        report.some((_level, index) => isSafe([...report.slice(0, index), ...report.slice(index + 1)]));
 }
 
 const reports = input.split('\n').filter(Boolean).map(report => report.split(' ').map(level => parseInt(level)));

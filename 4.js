@@ -192,16 +192,3 @@ for (let row = 0; row < height - 2; row++) {
 }
 
 console.log('Total X-MAS count:', result);
-
-
-// console.log('Rows:', rows);
-// console.log('Columns:', columns);
-// console.log('Diagonals up:\n', diagonalsUp.join('\n'));
-// console.log('Diagonals down:\n', diagonalsDown.join('\n'));
-
-// const matches = rows[0].match(/XMAS|SAMX/g);
-// console.log('Row 0 matches:', matches, matches.length);
-
-
-
-// const columns = rows.flatMap(row => row.split('').map((char, index) => ))
