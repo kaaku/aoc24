@@ -1,3 +1,5 @@
+import { encodePoint, isInsideMap, Point } from "./utils";
+
 const INPUT = `\
 676781023010121078756541010565410126589652103
 787692014523134569687238921076321087676543012
@@ -46,15 +48,7 @@ const INPUT = `\
 876545432321089012100100123165410321065690165\
 `;
 
-interface Point { x: number; y: number }
-
 const MAP = INPUT.split('\n').map(row => row.split('').map(cell => parseInt(cell)));
-const WIDTH = MAP[0].length;
-const HEIGHT = MAP.length;
-
-function isInsideMap({ x, y }: Point) {
-    return x >= 0 && y >= 0 && x < WIDTH && y < HEIGHT;
-}
 
 function getAdjacentPointsWithHeight(point: Point, height: number) {
     return [
@@ -63,12 +57,8 @@ function getAdjacentPointsWithHeight(point: Point, height: number) {
         { x: point.x, y: point.y - 1 },
         { x: point.x, y: point.y + 1 },
     ]
-        .filter(isInsideMap)
+        .filter(point => isInsideMap(point, MAP))
         .filter(point => MAP[point.y][point.x] === height);
-}
-
-function encodePoint({ x, y }: Point) {
-    return `${x}|${y}`;
 }
 
 function findTrailEnds(point: Point): Point[] {
