@@ -3,8 +3,12 @@ export interface Point {
     y: number;
 }
 
+export function areEqual(p1: Point, p2: Point) {
+    return p1.x === p2.x && p1.y === p2.y;
+}
+
 export function encodePoint({ x, y }: Point) {
-    return `${x}|${y}`;
+    return `${x},${y}`;
 }
 
 export function isInsideMap({ x, y }: Point, map: number[][]) {
