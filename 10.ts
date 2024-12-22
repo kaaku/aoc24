@@ -1,4 +1,4 @@
-import { encodePoint, isInsideMap, Point } from "./utils";
+import { encodePoint, getAdjacentPoints, isInsideMap, Point } from "./utils";
 
 const INPUT = `\
 676781023010121078756541010565410126589652103
@@ -51,12 +51,7 @@ const INPUT = `\
 const MAP = INPUT.split('\n').map(row => row.split('').map(cell => parseInt(cell)));
 
 function getAdjacentPointsWithHeight(point: Point, height: number) {
-    return [
-        { x: point.x - 1, y: point.y },
-        { x: point.x + 1, y: point.y },
-        { x: point.x, y: point.y - 1 },
-        { x: point.x, y: point.y + 1 },
-    ]
+    return getAdjacentPoints(point)
         .filter(point => isInsideMap(point, MAP))
         .filter(point => MAP[point.y][point.x] === height);
 }
