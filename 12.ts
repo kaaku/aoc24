@@ -146,6 +146,7 @@ CCCCCCCCCCCCRWWRRVVVVVVVVVVVQQQQQQQQQRRRRRRRRRRRRRCCCCCCUUUUUUUUUCCCOHHHHWHHHHHU
 interface Region {
     perimeter: number;
     plant: string;
+    sides: number;
     tiles: Point[];
 }
 
@@ -153,6 +154,68 @@ function countPerimeter(tile: Point, map: string[][]) {
     return 4 - getAdjacentPoints(tile)
         .filter(adjacent => isInsideMap(adjacent, map) && getValue(adjacent, map) === getValue(tile, map))
         .length;
+}
+
+function countSides(tiles: Point[]) {
+    const scanningArea = tiles.reduce(
+        (area, tile) => ({
+            start: { x: Math.min(area.start.x, tile.x), y: Math.min(area.start.y, tile.y) },
+            end: { x: Math.max(area.end.x, tile.x), y: Math.max(area.end.y, tile.y) },
+        }),
+        { start: { x: Number.MAX_SAFE_INTEGER, y: Number.MAX_SAFE_INTEGER }, end: { x: 0, y: 0 } },
+    );
+
+    let sides = 0;
+    
+    // Scan for horizontal sides
+    for (let y = scanningArea.start.y; y <= scanningArea.end.y; y++) {
+        let ongoingFenceAbove = false;
+        let ongoingFenceBelow = false;
+        for (let x = scanningArea.start.x; x <= scanningArea.end.x; x++) {
+            const isRegionTile = tiles.some(tile => areEqual(tile, { x, y }));
+            if (isRegionTile) {
+                const fenceAbove = !tiles.some(tile => areEqual(tile, { x, y: y - 1 }));
+                const fenceBelow = !tiles.some(tile => areEqual(tile, { x, y: y + 1 }));
+                if (fenceAbove && !ongoingFenceAbove) {
+                    sides++;
+                }
+                if (fenceBelow && !ongoingFenceBelow) {
+                    sides++
+                }
+                ongoingFenceAbove = fenceAbove;
+                ongoingFenceBelow = fenceBelow;
+            } else {
+                ongoingFenceAbove = false;
+                ongoingFenceBelow = false;
+            }
+        }
+    }
+
+    // Scan for vertical sides
+    for (let x = scanningArea.start.x; x <= scanningArea.end.x; x++) {
+        let ongoingFenceLeft = false;
+        let ongoingFenceRight = false;
+        for (let y = scanningArea.start.y; y <= scanningArea.end.y; y++) {
+            const isRegionTile = tiles.some(tile => areEqual(tile, { x, y }));
+            if (isRegionTile) {
+                const fenceLeft = !tiles.some(tile => areEqual(tile, { x: x - 1, y }));
+                const fenceRight = !tiles.some(tile => areEqual(tile, { x: x + 1, y }));
+                if (fenceLeft && !ongoingFenceLeft) {
+                    sides++;
+                }
+                if (fenceRight && !ongoingFenceRight) {
+                    sides++
+                }
+                ongoingFenceLeft = fenceLeft;
+                ongoingFenceRight = fenceRight;
+            } else {
+                ongoingFenceLeft = false;
+                ongoingFenceRight = false;
+            }
+        }
+    }
+    
+    return sides;
 }
 
 function getNeighborTilesWithSamePlant(tile: Point, map: string[][], ignoredTiles: Point[]) {
@@ -185,11 +248,15 @@ MAP.forEach((row, y) => row.forEach((plant, x) => {
     if (!processedTiles.has(encodePoint(tile))) {
         const tiles = findRegionTiles(tile, MAP);
         const perimeter = tiles.reduce((sum, _tile) => sum + countPerimeter(_tile, MAP), 0);
-        regions.push({ perimeter, plant, tiles });
+        const sides = countSides(tiles);
+        regions.push({ perimeter, plant, sides, tiles });
         tiles.map(encodePoint).forEach(encoded => processedTiles.add(encoded));
     }
 }));
 
 const fencePrice = regions.reduce((price, { perimeter, tiles }) => price + perimeter * tiles.length, 0);
+const discountedFencePrice = regions.reduce((price, { sides, tiles }) => price + sides * tiles.length, 0);
 
 console.log('Fence price:', fencePrice);
+console.log('Discounted fence price:', discountedFencePrice);
+
