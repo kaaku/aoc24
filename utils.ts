@@ -31,3 +31,18 @@ export function getValue<T>(point: Point, map: T[][]) {
 export function isInsideMap<T>({ x, y }: Point, map: T[][]) {
     return x >= 0 && y >= 0 && x < map[0].length && y < map.length;
 }
+
+export function memoize<IN extends any[], OUT>(fn: (...args: IN) => OUT): (...args: IN) => OUT {
+    const CACHE = new Map<string, OUT>();
+    return (...args: IN) => {
+        const key = args.join('|');
+        if (CACHE.has(key)) {
+            return CACHE.get(key);
+        }
+
+        const result = fn.apply(null, args);
+        CACHE.set(key, result);
+
+        return result;
+    };
+}
