@@ -1,4 +1,5 @@
-import { Point } from "./utils";
+import { areEqual, Point } from "./utils";
+import fs from 'fs';
 
 const INPUT = `\
 p=1,79 v=-93,36
@@ -534,6 +535,17 @@ function countSafetyFactor(robots: Robot[]) {
         .reduce((result, quadrantScore) => result * quadrantScore)
 }
 
+function printMap(robots: Robot[], seconds: number) {
+    let output = `Seconds: ${seconds}\n`;
+    for (let y = 0; y < HEIGHT; y++) {
+        for (let x = 0; x < WIDTH; x++) {
+            output += robots.some(robot => areEqual(robot.position, { x, y })) ? 'X' : ' ';
+        }
+        output += '\n';
+    }
+    return output;
+}
+
 let robots: Robot[] = INPUT
     .split('\n')
     .map(row => row.match(/p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)/))
@@ -544,9 +556,13 @@ let robots: Robot[] = INPUT
      }));
 
 let seconds = 0;
-while (seconds < 100) {
+while (seconds < 6620) {
     robots = robots.map(move);
     seconds++;
+
+    if (seconds === 100) {
+        console.log('Safety factor:', countSafetyFactor(robots));
+    }
 }
 
-console.log('Safety factor:', countSafetyFactor(robots));
+fs.writeFileSync('14-christmas-tree.txt', printMap(robots, seconds));
