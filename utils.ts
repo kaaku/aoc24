@@ -32,6 +32,10 @@ export function isInsideMap<T>({ x, y }: Point, map: T[][]) {
     return x >= 0 && y >= 0 && x < map[0].length && y < map.length;
 }
 
+export function isRoughlyInteger(int: number, precision = 3) {
+    return Number.isSafeInteger(int) || Math.abs(int - Math.round(int)) < 10 ** -precision;
+}
+
 export function memoize<IN extends any[], OUT>(fn: (...args: IN) => OUT): (...args: IN) => OUT {
     const CACHE = new Map<string, OUT>();
     return (...args: IN) => {

@@ -1,4 +1,4 @@
-import { areEqual, Point } from "./utils";
+import { areEqual, isRoughlyInteger, Point } from "./utils";
 
 const INPUT = `\
 Button A: X+62, Y+48
@@ -1308,7 +1308,7 @@ function parseMachine(input: string): Machine {
     };
 }
 
-function countMinimumTokens(machine: Machine) {
+function countMinimumTokensNaive(machine: Machine) {
     let aCount = 0;
     let bCount = Math.min(100, Math.floor(machine.prize.x / machine.b.x), Math.floor(machine.prize.y / machine.b.y));
     let position = { x: machine.b.x * bCount, y: machine.b.y * bCount };
@@ -1327,6 +1327,41 @@ function countMinimumTokens(machine: Machine) {
     return areEqual(position, machine.prize) ? 3 * aCount + bCount : null;
 }
 
-const MACHINES = INPUT.split('\n\n').map(parseMachine);
+function countMinimumTokensProper(machine: Machine) {
+    // Angles relative to x axis
+    const angleA = Math.atan2(machine.a.y, machine.a.x);
+    const angleB = Math.atan2(machine.b.y, machine.b.x);
+    const anglePrize = Math.atan2(machine.prize.y, machine.prize.x);
+    
+    const lengthA = Math.sqrt(machine.a.x ** 2 + machine.a.y ** 2);
+    const lengthB = Math.sqrt(machine.b.x ** 2 + machine.b.y ** 2);
+    const lengthPrize = Math.sqrt(machine.prize.x ** 2 + machine.prize.y ** 2);
 
-console.log('Minimum tokens required:', MACHINES.reduce((sum, machine) => sum + (countMinimumTokens(machine) ?? 0), 0));
+    // Angles of the triangle formed by the prize vector and solution vectors
+    const angle1 = Math.abs(anglePrize - angleA);
+    const angle2 = Math.abs(anglePrize - angleB);
+    const angle3 = Math.PI - angle1 - angle2;
+
+    const sideALength = lengthPrize / Math.sin(angle3) * Math.sin(angle2);
+    const sideBLength = lengthPrize / Math.sin(angle3) * Math.sin(angle1);
+
+    const aCount = sideALength / lengthA;
+    const bCount = sideBLength / lengthB;
+
+    return isRoughlyInteger(aCount) && isRoughlyInteger(bCount) ? 3 * aCount + bCount : null;
+}
+
+const MACHINES = INPUT.split('\n\n').map(parseMachine);
+const CORRECT_MACHINES = MACHINES.map(machine => ({
+    ...machine,
+    prize: { x: machine.prize.x + 10000000000000, y: machine.prize.y + 10000000000000 },
+}))
+
+console.log(
+    'Minimum tokens required (part I):',
+    MACHINES.reduce((sum, machine) => sum + (countMinimumTokensNaive(machine) ?? 0), 0),
+);
+console.log(
+    'Minimum tokens required (part II):',
+    CORRECT_MACHINES.reduce((sum, machine) => sum + (countMinimumTokensProper(machine) ?? 0), 0),
+);
