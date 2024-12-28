@@ -1,5 +1,5 @@
 import { areEqual, Point } from "./utils";
-import fs from 'fs';
+import * as fs from 'fs';
 
 const INPUT = `\
 p=1,79 v=-93,36
